@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Página Intermediaria</title>
+</head>
+<body>
+  <h3>Formato Inventario (Intermediario)</h3>
+  <div id="mensaje">Cargando...</div>
+
+  <script>
+  window.onload = async function() {
+    // 1) Leer parámetros de la URL de GitHub Pages
+    const params = new URLSearchParams(window.location.search);
+    const invId = params.get("INVENTARIO_ID") || "";
+    const cuadrilla = params.get("CUADRILLA") || "";
+    const fecha = params.get("FECHA") || "";
+    const placa = params.get("PLACA") || "";
+    const nomCua = params.get("NOMBRE_CUADRILLA") || "";
+    const nomSup = params.get("NOMBRE_SUPERVISOR") || "";
+    const especialista = params.get("ESPECIALISTA") || "";
+
+    // 2) Construir la URL de tu Apps Script
+    //    (Pega AQUÍ la URL de tu implementación con /exec)
+    //    OJO: SOLO la parte base, sin parámetros, luego los añadimos con encodeURIComponent
+    //    Ejemplo ficticio: "https://script.google.com/macros/s/AKfycbwTbFyXidE/exec"
+    const baseUrl = "https://script.google.com/macros/s/AKfycbwTbFyXidEDI_IPRQRaiXVxaqqId0AjBx8mC1SkADXofS-UGxAm-VhXyh2Bx6h4UEQ/exec";
+    
+    // 3) Armar la URL final con los mismos parámetros (EncodeURL)
+    const finalUrl = baseUrl
+      + "?INVENTARIO_ID=" + encodeURIComponent(invId)
+      + "&CUADRILLA=" + encodeURIComponent(cuadrilla)
+      + "&FECHA=" + encodeURIComponent(fecha)
+      + "&PLACA=" + encodeURIComponent(placa)
+      + "&NOMBRE_CUADRILLA=" + encodeURIComponent(nomCua)
+      + "&NOMBRE_SUPERVISOR=" + encodeURIComponent(nomSup)
+      + "&ESPECIALISTA=" + encodeURIComponent(especialista);
+
+    // 4) Llamar por fetch a la URL de Apps Script
+    try {
+      const resp = await fetch(finalUrl);
+      const html = await resp.text();
+
+      // 5) Insertar el HTML recibido en la página
+      document.getElementById("mensaje").innerHTML = html;
+    } catch (err) {
+      document.getElementById("mensaje").innerHTML =
+        "Error al conectar con Apps Script: " + err;
+    }
+  };
+  </script>
+</body>
+</html>
