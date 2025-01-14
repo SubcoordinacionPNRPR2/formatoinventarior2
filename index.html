@@ -2,52 +2,60 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Página Intermediaria</title>
+  <title>Prueba con JSON (PDF en base64)</title>
 </head>
 <body>
-  <h3>Formato Inventario (Intermediario)</h3>
-  <div id="mensaje">Cargando...</div>
 
-  <script>
-  window.onload = async function() {
-    // 1) Leer parámetros de la URL de GitHub Pages
-    const params = new URLSearchParams(window.location.search);
-    const invId = params.get("INVENTARIO_ID") || "";
-    const cuadrilla = params.get("CUADRILLA") || "";
-    const fecha = params.get("FECHA") || "";
-    const placa = params.get("PLACA") || "";
-    const nomCua = params.get("NOMBRE_CUADRILLA") || "";
-    const nomSup = params.get("NOMBRE_SUPERVISOR") || "";
-    const especialista = params.get("ESPECIALISTA") || "";
+<h1>Generar y Descargar PDF</h1>
 
-    // 2) Construir la URL de tu Apps Script
-    //    (Pega AQUÍ la URL de tu implementación con /exec)
-    //    OJO: SOLO la parte base, sin parámetros, luego los añadimos con encodeURIComponent
-    //    Ejemplo ficticio: "https://script.google.com/macros/s/AKfycbwTbFyXidE/exec"
-    const baseUrl = "https://script.google.com/macros/s/AKfycbz2Z5vfKrPXUuGVcm442KSUUra-fDWN4mbKT1QIrzW0EclQTFnHB8GHg7YmRDMM8A45/exec";
-    
-    // 3) Armar la URL final con los mismos parámetros (EncodeURL)
-    const finalUrl = baseUrl
-      + "?INVENTARIO_ID=" + encodeURIComponent(invId)
-      + "&CUADRILLA=" + encodeURIComponent(cuadrilla)
-      + "&FECHA=" + encodeURIComponent(fecha)
-      + "&PLACA=" + encodeURIComponent(placa)
-      + "&NOMBRE_CUADRILLA=" + encodeURIComponent(nomCua)
-      + "&NOMBRE_SUPERVISOR=" + encodeURIComponent(nomSup)
-      + "&ESPECIALISTA=" + encodeURIComponent(especialista);
+<!-- Un botón para disparar la acción -->
+<button id="btnGenerar">Generar PDF</button>
 
-    // 4) Llamar por fetch a la URL de Apps Script
-    try {
-      const resp = await fetch(finalUrl);
-      const html = await resp.text();
+<!-- Aquí pondremos el enlace de descarga al PDF -->
+<div id="resultado"></div>
 
-      // 5) Insertar el HTML recibido en la página
-      document.getElementById("mensaje").innerHTML = html;
-    } catch (err) {
-      document.getElementById("mensaje").innerHTML =
-        "Error al conectar con Apps Script: " + err;
+<script>
+document.getElementById("btnGenerar").addEventListener("click", async function() {
+  // 1. Construimos la URL a tu Apps Script (con /exec) y los parámetros
+  const url = "https://script.google.com/macros/s/AKfycb12345/exec"
+    + "?INVENTARIO_ID=ABC"
+    + "&CUADRILLA=4418"
+    + "&FECHA=01/01/2025"
+    + "&PLACA=TEST-PLACA"
+    + "&NOMBRE_CUADRILLA=Juan"
+    + "&NOMBRE_SUPERVISOR=Pedro"
+    + "&ESPECIALISTA=Maria";
+
+  // 2. Hacemos el fetch (GET), esperando JSON
+  try {
+    const resp = await fetch(url);
+    const data = await resp.json();
+
+    // 3. Revisamos si success == true
+    if (!data.success) {
+      document.getElementById("resultado").innerText = 
+        "Ocurrió un error: " + data.mensaje;
+      return;
     }
-  };
-  </script>
+
+    // 4. Generamos un enlace con base64
+    const base64Pdf = data.pdfBase64; // la propiedad que devuelves en Apps Script
+    const link = document.createElement("a");
+    link.href = "data:application/pdf;base64," + base64Pdf;
+    link.download = "inventario.pdf";
+    link.textContent = "Descargar PDF";
+
+    // Limpiamos el div "resultado" y metemos el enlace
+    const contenedor = document.getElementById("resultado");
+    contenedor.innerHTML = "";
+    contenedor.appendChild(link);
+
+  } catch (err) {
+    document.getElementById("resultado").innerText = 
+      "Error realizando fetch: " + err;
+  }
+});
+</script>
+
 </body>
 </html>
